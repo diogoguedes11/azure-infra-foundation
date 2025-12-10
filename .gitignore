@@ -1,0 +1,39 @@
+# --- Terraform Core ---
+# The folder where plugins are stored (huge, do not commit)
+**/.terraform/
+
+# State files (CRITICAL: Never commit these, they contain secrets!)
+*.tfstate
+*.tfstate.*
+
+# crash logs
+crash.log
+crash.log.*
+
+#  lock  files
+.terraform.lock.hcl
+
+# --- Secrets and vars ---
+terraform.tfvars
+*.auto.tfvars
+
+!example.tfvars
+
+# --- Azure ---
+.azure/
+
+# --- IDEs---
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains / IntelliJ
+.idea/
+
+# --- OS ---
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
