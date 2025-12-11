@@ -6,3 +6,12 @@ module "networking" {
   vnet_name           = "vnet-foundation"
   location            = "westeurope"
 }
+
+module "compute" {
+  source                  = "../../modules/compute"
+  prefix                  = "prodvm"
+  location                = "westeurope"
+  resource_group_name     = module.networking.resource_group_name
+  subnet_address_prefixes = module.networking.subnets["internal"]
+  vm_size                 = "Standard_DS1_v2"
+}
