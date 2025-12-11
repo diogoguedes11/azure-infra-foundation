@@ -2,7 +2,7 @@
 resource "azurerm_subnet" "internal" {
   name                 = "internal"
   resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.this.name
+  virtual_network_name = var.virtual_network_name
   address_prefixes     = var.subnet_address_prefixes
 }
 
@@ -10,12 +10,21 @@ resource "azurerm_network_interface" "main" {
   name                = "${var.prefix}-nic"
   location            = var.location
   resource_group_name = var.resource_group_name
-
   ip_configuration {
     name                          = "testconfiguration1"
     subnet_id                     = azurerm_subnet.internal.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = var.create_public_ip ? azurerm_public_ip.main[0].id : null
   }
+}
+
+resource "azurerm_public_ip" "main" {
+  count               = var.create_public_ip ? 1 : 0
+  name                = "${var.prefix}-public-ip"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 resource "azurerm_virtual_machine" "this" {
@@ -52,4 +61,23 @@ resource "azurerm_virtual_machine" "this" {
   tags = {
     Environment = "Foundation"
   }
+}
+
+resource "azurerm_network_security_group" "this" {
+  name                = "${var.prefix}-nsg"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  security_rule {
+    name                       = "SSH"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
 }

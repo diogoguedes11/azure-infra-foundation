@@ -37,3 +37,7 @@ terraform.tfvars
 # Windows
 Thumbs.db
 Desktop.ini
+
+
+# backend
+backend.conf

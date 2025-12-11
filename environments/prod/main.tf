@@ -12,6 +12,8 @@ module "compute" {
   prefix                  = "prodvm"
   location                = "westeurope"
   resource_group_name     = module.networking.resource_group_name
-  subnet_address_prefixes = module.networking.subnets["internal"]
-  vm_size                 = "Standard_DS1_v2"
+  subnet_address_prefixes = ["10.0.4.0/24"]
+  vm_size                 = "Standard_B2s"
+  virtual_network_name    = module.networking.vnet_name
+  create_public_ip        = true
 }
