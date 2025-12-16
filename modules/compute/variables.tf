@@ -37,3 +37,7 @@ variable "admin_password" {
   description = "A password that comes from Key vault"
   sensitive   = true
 }
+variable "boot_diagnostics_storage_uri" {
+  description = "The storage account blob endpoint for boot diagnostics"
+  type        = string
+}

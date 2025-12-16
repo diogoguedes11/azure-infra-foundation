@@ -13,7 +13,7 @@ variable "tenant_id" {
   type        = string
 }
 
-variable "key_vault_name" {
+variable "storage_account_name" {
+  description = "The name of the Storage Account"
   type        = string
-  description = "The name of the Key Vault"
 }

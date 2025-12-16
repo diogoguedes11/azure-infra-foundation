@@ -58,6 +58,19 @@ resource "azurerm_virtual_machine" "this" {
     computer_name  = "${var.prefix}-vm"
     admin_username = "admintest"
     admin_password = var.admin_password
+    custom_data = base64encode(<<-EOF
+      #!/bin/bash
+      apt-get update
+      apt-get install -y nginx
+      echo "Hello Azure!" > /var/www/html/index.html
+      systemctl enable nginx
+      systemctl start nginx
+    EOF
+    )
+  }
+  boot_diagnostics {
+    enabled     = true
+    storage_uri = var.boot_diagnostics_storage_uri
   }
   os_profile_linux_config {
     disable_password_authentication = false
@@ -65,6 +78,7 @@ resource "azurerm_virtual_machine" "this" {
   tags = {
     Environment = "Foundation"
   }
+
 }
 
 resource "azurerm_network_security_group" "this" {
