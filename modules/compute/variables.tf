@@ -32,3 +32,8 @@ variable "virtual_network_name" {
   description = "virtual machine name"
   type        = string
 }
+variable "admin_password" {
+  type        = string
+  description = "A password that comes from Key vault"
+  sensitive   = true
+}

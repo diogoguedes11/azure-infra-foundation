@@ -1,10 +1,16 @@
 
+module "security" {
+  source              = "../../modules/security"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tenant_id           = var.tenant_id
+}
 module "networking" {
   source              = "../../modules/networking"
-  resource_group_name = "rg-foundation-prod"
+  resource_group_name = var.resource_group_name
   address_space       = ["10.0.0.0/16"]
   vnet_name           = "vnet-foundation"
-  location            = "westeurope"
+  location            = var.location
 }
 
 module "compute" {
@@ -16,4 +22,12 @@ module "compute" {
   vm_size                 = "Standard_B2s"
   virtual_network_name    = module.networking.vnet_name
   create_public_ip        = true
+  admin_password          = module.security.vm_admin_password
+}
+
+
+resource "azurerm_role_assignment" "vm_key_vault_access" {
+  principal_id         = module.compute.vm_principal_id
+  role_definition_name = "Key Vault Secrets User"
+  scope                = module.security.key_vault_id
 }

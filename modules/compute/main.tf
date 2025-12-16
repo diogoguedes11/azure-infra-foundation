@@ -6,6 +6,8 @@ resource "azurerm_subnet" "internal" {
   address_prefixes     = var.subnet_address_prefixes
 }
 
+
+
 resource "azurerm_network_interface" "main" {
   name                = "${var.prefix}-nic"
   location            = var.location
@@ -37,7 +39,9 @@ resource "azurerm_virtual_machine" "this" {
   delete_os_disk_on_termination = true
 
   delete_data_disks_on_termination = true
-
+  identity {
+    type = "SystemAssigned"
+  }
   storage_image_reference {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"
@@ -51,9 +55,9 @@ resource "azurerm_virtual_machine" "this" {
     managed_disk_type = "Standard_LRS"
   }
   os_profile {
-    computer_name  = "hostname"
-    admin_username = "testadmin"     # test
-    admin_password = "Password1234!" # test
+    computer_name  = "${var.prefix}-vm"
+    admin_username = "admintest"
+    admin_password = var.admin_password
   }
   os_profile_linux_config {
     disable_password_authentication = false
@@ -64,13 +68,13 @@ resource "azurerm_virtual_machine" "this" {
 }
 
 resource "azurerm_network_security_group" "this" {
-  name                = "${var.prefix}-nsg"
+  name                = "${azurerm_virtual_machine.this.name}-nsg"
   location            = var.location
   resource_group_name = var.resource_group_name
 
   security_rule {
     name                       = "SSH"
-    priority                   = 1001
+    priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
