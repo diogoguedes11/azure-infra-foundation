@@ -13,7 +13,7 @@ resource "azurerm_virtual_network" "this" {
 }
 
 # Azure subnet
-resource "azurerm_subnet" "this" {
+resource "azurerm_subnet" "internal" {
   for_each             = var.subnets
   name                 = each.key
   resource_group_name  = var.resource_group_name
@@ -22,7 +22,7 @@ resource "azurerm_subnet" "this" {
 }
 
 # NSG (Network Security Group)
-resource "azurerm_network_security_group" "this" {
+resource "azurerm_network_security_group" "main" {
   name                = "nsg-${var.vnet_name}"
   location            = var.location
   resource_group_name = var.resource_group_name

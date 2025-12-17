@@ -10,5 +10,5 @@ output "vnet_name" {
 
 output "subnet_ids" {
   description = "Map of IDs of all created subnets"
-  value       = { for k, v in azurerm_subnet.this : k => v.id }
+  value       = { for k, v in azurerm_subnet.internal : k => v.id }
 }

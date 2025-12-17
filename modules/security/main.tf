@@ -1,6 +1,6 @@
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_key_vault" "key_vault" {
+resource "azurerm_key_vault" "this" {
   name                        = var.key_vault_name
   location                    = var.location
   resource_group_name         = var.resource_group_name
@@ -19,21 +19,21 @@ resource "azurerm_key_vault" "key_vault" {
   }
 }
 
-resource "random_password" "vm_admin_password" {
+resource "random_password" "main" {
   length           = 20
   special          = true
   override_special = "!@#$%^&*()"
 }
 
-resource "azurerm_key_vault_secret" "admin_password_secret" {
+resource "azurerm_key_vault_secret" "main" {
   name         = "vm-admin-password"
-  value        = random_password.vm_admin_password.result
-  key_vault_id = azurerm_key_vault.key_vault.id
-  depends_on   = [azurerm_role_assignment.key_vault_role]
+  value        = random_password.main.result
+  key_vault_id = azurerm_key_vault.this.id
+  depends_on   = [azurerm_role_assignment.main]
 }
 
-resource "azurerm_role_assignment" "key_vault_role" {
-  scope                = azurerm_key_vault.key_vault.id
+resource "azurerm_role_assignment" "main" {
+  scope                = azurerm_key_vault.this.id
   role_definition_name = "Key Vault Secrets Officer"
   principal_id         = data.azurerm_client_config.current.object_id
 }
