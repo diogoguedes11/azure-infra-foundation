@@ -1,26 +1,23 @@
-
-resource "azurerm_subnet" "internal" {
+resource "azurerm_subnet" "internal_subnet" {
   name                 = "internal"
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.virtual_network_name
   address_prefixes     = var.subnet_address_prefixes
 }
 
-
-
-resource "azurerm_network_interface" "main" {
+resource "azurerm_network_interface" "primary_nic" {
   name                = "${var.prefix}-nic"
   location            = var.location
   resource_group_name = var.resource_group_name
   ip_configuration {
     name                          = "testconfiguration1"
-    subnet_id                     = azurerm_subnet.internal.id
+    subnet_id                     = azurerm_subnet.internal_subnet.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = var.create_public_ip ? azurerm_public_ip.main[0].id : null
+    public_ip_address_id          = var.create_public_ip ? azurerm_public_ip.public_ip[0].id : null
   }
 }
 
-resource "azurerm_public_ip" "main" {
+resource "azurerm_public_ip" "public_ip" {
   count               = var.create_public_ip ? 1 : 0
   name                = "${var.prefix}-public-ip"
   location            = var.location
@@ -29,15 +26,14 @@ resource "azurerm_public_ip" "main" {
   sku                 = "Standard"
 }
 
-resource "azurerm_virtual_machine" "this" {
+resource "azurerm_virtual_machine" "virtual_machine" {
   name                  = "${var.prefix}-vm"
   location              = var.location
   resource_group_name   = var.resource_group_name
-  network_interface_ids = [azurerm_network_interface.main.id]
+  network_interface_ids = [azurerm_network_interface.primary_nic.id]
   vm_size               = var.vm_size
 
-  delete_os_disk_on_termination = true
-
+  delete_os_disk_on_termination    = true
   delete_data_disks_on_termination = true
   identity {
     type = "SystemAssigned"
@@ -58,15 +54,7 @@ resource "azurerm_virtual_machine" "this" {
     computer_name  = "${var.prefix}-vm"
     admin_username = "admintest"
     admin_password = var.admin_password
-    custom_data = base64encode(<<-EOF
-      #!/bin/bash
-      apt-get update
-      apt-get install -y nginx
-      echo "Hello Azure!" > /var/www/html/index.html
-      systemctl enable nginx
-      systemctl start nginx
-    EOF
-    )
+    custom_data    = filebase64("${path.module}/cloud-init.sh")
   }
   boot_diagnostics {
     enabled     = true
@@ -76,13 +64,14 @@ resource "azurerm_virtual_machine" "this" {
     disable_password_authentication = false
   }
   tags = {
-    Environment = "Foundation"
+    Environment = "Production"
+    ManagedBy   = "Terraform"
+    Owner       = "diogo.guedes"
   }
-
 }
 
-resource "azurerm_network_security_group" "this" {
-  name                = "${azurerm_virtual_machine.this.name}-nsg"
+resource "azurerm_network_security_group" "vm_nsg" {
+  name                = "${azurerm_virtual_machine.virtual_machine.name}-nsg"
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -94,8 +83,7 @@ resource "azurerm_network_security_group" "this" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = "*"
+    source_address_prefix      = "203.0.113.0/24"
     destination_address_prefix = "*"
   }
-
 }

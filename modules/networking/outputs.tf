@@ -10,10 +10,5 @@ output "vnet_name" {
 
 output "subnet_ids" {
   description = "Map of IDs of all created subnets"
-  value       = { for k, v in azurerm_subnet.subnets : k => v.id }
-}
-
-output "resource_group_name" {
-  description = "Name of the resource group"
-  value       = azurerm_resource_group.this.name
+  value       = { for k, v in azurerm_subnet.this : k => v.id }
 }
