@@ -70,6 +70,9 @@ resource "azurerm_linux_virtual_machine" "this" {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
+  identity {
+    type = "SystemAssigned"
+  }
 
   source_image_reference {
     publisher = "Canonical"
