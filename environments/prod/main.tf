@@ -4,6 +4,12 @@ resource "azurerm_resource_group" "this" {
   location = var.location
 }
 
+module "monitoring" {
+  source              = "../../modules/monitoring"
+  resource_group_name = azurerm_resource_group.this.name
+  location            = var.location
+}
+
 module "security" {
   source              = "../../modules/security"
   key_vault_name      = "kv-prod-foundation1105"
@@ -40,9 +46,16 @@ resource "azurerm_role_assignment" "vm_key_vault_access" {
   scope                = module.security.key_vault_id
 }
 
-module "backups" {
-  source              = "../../modules/backups"
-  resource_group_name = azurerm_resource_group.this.name
-  location            = var.location
-  vm_id               = module.compute.vm_id
+# module "backups" {
+#   source              = "../../modules/backups"
+#   resource_group_name = azurerm_resource_group.this.name
+#   location            = var.location
+#   vm_id               = module.compute.vm_id
+# }
+
+resource "azurerm_monitor_data_collection_rule_association" "this" {
+  name                    = "vm-dcr-assoc"
+  target_resource_id      = module.compute.vm_id
+  data_collection_rule_id = module.monitoring.dcr_id_output
+
 }

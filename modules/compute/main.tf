@@ -41,7 +41,7 @@ resource "azurerm_network_security_group" "main" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = "203.0.113.0/24" # Boa prática usar IP fixo!
+    source_address_prefix      = "0.0.0.0/0" # tests
     destination_address_prefix = "*"
   }
 }
@@ -90,4 +90,13 @@ resource "azurerm_linux_virtual_machine" "this" {
     ManagedBy   = "Terraform"
     Owner       = "diogo.guedes"
   }
+}
+
+resource "azurerm_virtual_machine_extension" "ama" {
+  name                       = "AMA"
+  virtual_machine_id         = azurerm_linux_virtual_machine.this.id
+  publisher                  = "Microsoft.Azure.Monitor"
+  type                       = "AzureMonitorLinuxAgent"
+  type_handler_version       = "1.13"
+  auto_upgrade_minor_version = true
 }
