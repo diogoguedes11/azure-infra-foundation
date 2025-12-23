@@ -32,8 +32,18 @@ variable "virtual_network_name" {
   description = "virtual machine name"
   type        = string
 }
-variable "admin_password" {
+variable "subnet_id" {
+  description = "The ID of the subnet to deploy the VM into"
   type        = string
-  description = "A password that comes from Key vault"
-  sensitive   = true
+}
+
+variable "ssh_public_key" {
+  description = "SSH public key for VM access"
+  type        = string
+
+}
+variable "common_tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
+  default     = {}
 }

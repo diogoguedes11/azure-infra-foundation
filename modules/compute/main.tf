@@ -1,9 +1,3 @@
-resource "azurerm_subnet" "internal" {
-  name                 = "internal"
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = var.virtual_network_name
-  address_prefixes     = var.subnet_address_prefixes
-}
 resource "azurerm_public_ip" "main" {
   count               = var.create_public_ip ? 1 : 0
   name                = "${var.prefix}-pip"
@@ -22,7 +16,7 @@ resource "azurerm_network_interface" "main" {
     # CRÍTICO: "testconfiguration1" é amador.
     # Usa um nome descritivo.
     name                          = "primary-ip-config"
-    subnet_id                     = azurerm_subnet.internal.id
+    subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = var.create_public_ip ? azurerm_public_ip.main[0].id : null
   }
@@ -60,8 +54,7 @@ resource "azurerm_linux_virtual_machine" "this" {
 
   network_interface_ids = [azurerm_network_interface.main.id]
 
-  admin_password                  = var.admin_password
-  disable_password_authentication = false
+  disable_password_authentication = true
 
   custom_data = filebase64("${path.module}/cloud-init.sh")
 
@@ -74,6 +67,10 @@ resource "azurerm_linux_virtual_machine" "this" {
     type = "SystemAssigned"
   }
 
+  admin_ssh_key {
+    username   = "admintest"
+    public_key = var.ssh_public_key
+  }
   source_image_reference {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"
@@ -85,11 +82,7 @@ resource "azurerm_linux_virtual_machine" "this" {
     storage_account_uri = null
   }
 
-  tags = {
-    Environment = "Production"
-    ManagedBy   = "Terraform"
-    Owner       = "diogo.guedes"
-  }
+  tags = var.common_tags
 }
 
 resource "azurerm_virtual_machine_extension" "ama" {

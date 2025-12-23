@@ -5,11 +5,7 @@ resource "azurerm_virtual_network" "this" {
   resource_group_name = var.resource_group_name
   address_space       = var.address_space
 
-  tags = {
-    Environment = "Production"
-    ManagedBy   = "Terraform"
-    Owner       = "diogo.guedes"
-  }
+  tags = var.common_tags
 }
 
 # Azure subnet
@@ -27,9 +23,5 @@ resource "azurerm_network_security_group" "main" {
   location            = var.location
   resource_group_name = var.resource_group_name
 
-  tags = {
-    Environment = "Production"
-    ManagedBy   = "Terraform"
-    Owner       = "diogo.guedes"
-  }
+  tags = var.common_tags
 }

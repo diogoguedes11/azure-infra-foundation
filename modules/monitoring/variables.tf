@@ -8,3 +8,8 @@ variable "resource_group_name" {
   type        = string
 }
 
+
+variable "alert_email" {
+  description = "Alert email to be notified"
+  type        = string
+}

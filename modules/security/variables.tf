@@ -17,3 +17,8 @@ variable "key_vault_name" {
   type        = string
   description = "The name of the Key Vault"
 }
+variable "common_tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
+  default     = {}
+}

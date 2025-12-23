@@ -27,3 +27,7 @@ variable "subnets" {
     "snet-db"       = "10.0.3.0/24"
   }
 }
+variable "common_tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
+}

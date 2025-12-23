@@ -3,7 +3,6 @@ variable "resource_group_name" {
   description = "Resource group name"
   default     = "rg-foundation-prod"
 }
-
 variable "location" {
   type        = string
   description = "Location for all resources"
@@ -19,5 +18,10 @@ variable "tenant_id" {
 variable "subscription_id" {
   type        = string
   description = "Subscription ID"
+}
+
+variable "alert_email" {
+  type        = string
+  description = "Alert mail to be notified"
 }
 

@@ -8,6 +8,10 @@ terraform {
       source  = "hashicorp/helm"
       version = "=3.1.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
   backend "azurerm" {
   }
@@ -16,3 +20,4 @@ terraform {
 provider "azurerm" {
   features {}
 }
+

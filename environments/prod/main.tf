@@ -1,14 +1,24 @@
+locals {
+  common_tags = {
+    Project     = "Foundation"
+    Environment = "prod"
+    CostCenter  = "IT-Cloud-001"
+    ManagedBy   = "Terraform"
+  }
+}
 # Resource group
 resource "azurerm_resource_group" "this" {
   name     = var.resource_group_name
   location = var.location
+  tags     = local.common_tags
 }
 
-module "monitoring" {
-  source              = "../../modules/monitoring"
-  resource_group_name = azurerm_resource_group.this.name
-  location            = var.location
-}
+# module "monitoring" {
+#   source              = "../../modules/monitoring"
+#   resource_group_name = azurerm_resource_group.this.name
+#   location            = var.location
+#   alert_email         = var.alert_email
+# }
 
 module "security" {
   source              = "../../modules/security"
@@ -16,6 +26,7 @@ module "security" {
   resource_group_name = azurerm_resource_group.this.name
   location            = var.location
   tenant_id           = var.tenant_id
+  common_tags         = local.common_tags
 }
 
 module "networking" {
@@ -24,6 +35,7 @@ module "networking" {
   address_space       = ["10.0.0.0/16"]
   vnet_name           = "vnet-foundation"
   location            = var.location
+  common_tags         = local.common_tags
 }
 
 module "compute" {
@@ -35,7 +47,9 @@ module "compute" {
   vm_size                 = "Standard_B2s"
   virtual_network_name    = module.networking.vnet_name
   create_public_ip        = true
-  admin_password          = module.security.vm_admin_password
+  subnet_id               = module.networking.subnet_ids["snet-backend"]
+  ssh_public_key          = module.security.ssh_public_key
+  common_tags             = local.common_tags
 }
 
 
@@ -53,9 +67,9 @@ resource "azurerm_role_assignment" "vm_key_vault_access" {
 #   vm_id               = module.compute.vm_id
 # }
 
-resource "azurerm_monitor_data_collection_rule_association" "this" {
-  name                    = "vm-dcr-assoc"
-  target_resource_id      = module.compute.vm_id
-  data_collection_rule_id = module.monitoring.dcr_id_output
+# resource "azurerm_monitor_data_collection_rule_association" "this" {
+#   name                    = "vm-dcr-assoc"
+#   target_resource_id      = module.compute.vm_id
+#   data_collection_rule_id = module.monitoring.dcr_id_output
 
-}
+# }
