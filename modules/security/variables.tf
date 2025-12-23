@@ -22,3 +22,13 @@ variable "common_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "virtual_network_id" {
+  description = "Virtual Network id"
+  type        = string
+}
+
+variable "subnet_id" {
+  description = "Subnet id"
+  type        = string
+}

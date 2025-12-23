@@ -46,7 +46,7 @@ module "networking" {
 module "compute" {
   source                  = "../../modules/compute"
   prefix                  = "prodvm"
-  location                = "westeurope"
+  location                = var.location
   resource_group_name     = azurerm_resource_group.this.name
   subnet_address_prefixes = ["10.0.4.0/24"]
   vm_size                 = "Standard_B2s"

@@ -44,3 +44,33 @@ resource "azurerm_role_assignment" "main" {
   role_definition_name = "Key Vault Secrets Officer"
   principal_id         = data.azurerm_client_config.current.object_id
 }
+
+resource "azurerm_private_dns_zone" "vault_dns" {
+  name                = "privatelink.vaultcore.azure.net"
+  resource_group_name = var.resource_group_name
+  tags                = var.common_tags
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "vnet_link" {
+  name                  = "vnet-link-to-keyvault-dns"
+  resource_group_name   = var.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.vault_dns.name
+  virtual_network_id    = var.virtual_network_id
+  registration_enabled  = false
+
+}
+
+
+resource "azurerm_private_endpoint" "kv_pe" {
+  name                = "pe-keyvault"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = var.subnet_id
+
+  private_service_connection {
+    name                           = "psc-kv"
+    private_connection_resource_id = azurerm_key_vault.this.id
+    is_manual_connection           = false
+    subresource_names              = ["vault"]
+  }
+}
