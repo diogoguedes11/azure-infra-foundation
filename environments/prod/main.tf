@@ -20,6 +20,11 @@ resource "azurerm_resource_group" "this" {
 #   alert_email         = var.alert_email
 # }
 
+# Azure policies via governance module
+module "governance" {
+  source = "../../modules/governance"
+}
+
 module "security" {
   source              = "../../modules/security"
   key_vault_name      = "kv-prod-foundation1105"
