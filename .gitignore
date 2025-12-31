@@ -2,7 +2,6 @@
 # The folder where plugins are stored (huge, do not commit)
 **/.terraform/
 
-# State files (CRITICAL: Never commit these, they contain secrets!)
 *.tfstate
 *.tfstate.*
 

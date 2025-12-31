@@ -47,3 +47,8 @@ variable "common_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "vm_scale_set" {
+  type    = bool
+  default = false
+}
