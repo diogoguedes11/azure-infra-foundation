@@ -57,7 +57,7 @@ module "compute" {
   subnet_id               = module.networking.subnet_ids["snet-backend"]
   ssh_public_key          = module.security.ssh_public_key
   common_tags             = local.common_tags
-  vm_scale_set            = false # Set to true to deploy a VM Scale Set with LB
+  vm_scale_set            = true # Set to true to deploy a VM Scale Set with LB
 }
 
 

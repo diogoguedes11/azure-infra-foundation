@@ -45,8 +45,8 @@ resource "azurerm_network_security_group" "main" {
 resource "azurerm_network_interface_security_group_association" "main" {
   count = var.vm_scale_set ? 0 : 1
 
-  network_interface_id      = azurerm_network_interface.main.id
-  network_security_group_id = azurerm_network_security_group.main.id
+  network_interface_id      = azurerm_network_interface.main[count.index].id
+  network_security_group_id = azurerm_network_security_group.main[count.index].id
 }
 
 resource "azurerm_linux_virtual_machine" "this" {
@@ -58,7 +58,7 @@ resource "azurerm_linux_virtual_machine" "this" {
   size                = var.vm_size
   admin_username      = "admintest"
 
-  network_interface_ids = [azurerm_network_interface.main.id]
+  network_interface_ids = [azurerm_network_interface.main[count.index].id]
 
   disable_password_authentication = true
 
@@ -94,7 +94,7 @@ resource "azurerm_virtual_machine_extension" "ama" {
   count = var.vm_scale_set ? 0 : 1
 
   name                       = "AMA"
-  virtual_machine_id         = azurerm_linux_virtual_machine.this.id
+  virtual_machine_id         = azurerm_linux_virtual_machine.this[count.index].id
   publisher                  = "Microsoft.Azure.Monitor"
   type                       = "AzureMonitorLinuxAgent"
   type_handler_version       = "1.13"
@@ -127,14 +127,14 @@ resource "azurerm_lb" "main" {
 
   frontend_ip_configuration {
     name                 = "PublicIPAddress"
-    public_ip_address_id = azurerm_public_ip.lb_pip.id
+    public_ip_address_id = azurerm_public_ip.lb_pip[count.index].id
   }
 }
 
 resource "azurerm_lb_backend_address_pool" "bepool" {
   count = var.vm_scale_set ? 1 : 0
 
-  loadbalancer_id = azurerm_lb.main.id
+  loadbalancer_id = azurerm_lb.main[count.index].id
   name            = "MainBackendPool"
 }
 
@@ -142,7 +142,7 @@ resource "azurerm_lb_backend_address_pool" "bepool" {
 resource "azurerm_lb_probe" "http" {
   count = var.vm_scale_set ? 1 : 0
 
-  loadbalancer_id = azurerm_lb.main.id
+  loadbalancer_id = azurerm_lb.main[count.index].id
   name            = "http-probe"
   port            = 80
   protocol        = "Tcp"
@@ -151,14 +151,14 @@ resource "azurerm_lb_probe" "http" {
 resource "azurerm_lb_rule" "http" {
   count = var.vm_scale_set ? 1 : 0
 
-  loadbalancer_id                = azurerm_lb.main.id
+  loadbalancer_id                = azurerm_lb.main[count.index].id
   name                           = "LBRule"
   protocol                       = "Tcp"
   frontend_port                  = 80
   backend_port                   = 80
   frontend_ip_configuration_name = "PublicIPAddress"
-  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.bepool.id]
-  probe_id                       = azurerm_lb_probe.http.id
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.bepool[count.index].id]
+  probe_id                       = azurerm_lb_probe.http[count.index].id
 }
 
 
@@ -176,6 +176,12 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
     username   = "admintest"
     public_key = var.ssh_public_key
   }
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
 
   os_disk {
     storage_account_type = "Standard_LRS"
@@ -190,11 +196,15 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
       primary   = true
       subnet_id = var.subnet_id
 
-      load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.bepool.id]
+      load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.bepool[count.index].id]
     }
   }
   upgrade_mode = "Automatic"
   custom_data  = filebase64("${path.module}/cloud-init.sh")
+
+  identity {
+    type = "SystemAssigned"
+  }
 
   tags = var.common_tags
   lifecycle {
@@ -210,7 +220,7 @@ resource "azurerm_monitor_autoscale_setting" "main" {
   name                = "autoscale-config"
   resource_group_name = var.resource_group_name
   location            = var.location
-  target_resource_id  = azurerm_linux_virtual_machine_scale_set.vmss.id
+  target_resource_id  = azurerm_linux_virtual_machine_scale_set.vmss[count.index].id
 
   profile {
     name = "defaultProfile"
@@ -224,7 +234,7 @@ resource "azurerm_monitor_autoscale_setting" "main" {
     rule {
       metric_trigger {
         metric_name        = "Percentage CPU"
-        metric_resource_id = azurerm_linux_virtual_machine_scale_set.vmss.id
+        metric_resource_id = azurerm_linux_virtual_machine_scale_set.vmss[count.index].id
         time_grain         = "PT1M"
         statistic          = "Average"
         time_window        = "PT5M"
@@ -244,7 +254,7 @@ resource "azurerm_monitor_autoscale_setting" "main" {
     rule {
       metric_trigger {
         metric_name        = "Percentage CPU"
-        metric_resource_id = azurerm_linux_virtual_machine_scale_set.vmss.id
+        metric_resource_id = azurerm_linux_virtual_machine_scale_set.vmss[count.index].id
         time_grain         = "PT1M"
         statistic          = "Average"
         time_window        = "PT5M"

@@ -24,7 +24,7 @@ variable "subnets" {
   default = {
     "snet-frontend" = "10.0.1.0/24"
     "snet-backend"  = "10.0.2.0/24"
-    "snet-db"       = "10.0.3.0/24"
+    "snet-security" = "10.0.3.0/24"
   }
 }
 variable "common_tags" {
