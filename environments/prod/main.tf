@@ -48,13 +48,14 @@ module "networking" {
   common_tags         = local.common_tags
 }
 
+# Bastion Host
 module "bastion" {
   source              = "../../modules/bastion"
   resource_group_name = azurerm_resource_group.this.name
   location            = var.location
-  virtual_network_id  = module.networking.vnet_id
-  common_tags         = local.common_tags
   subnet_id           = module.networking.subnet_ids["AzureBastionSubnet"]
+  common_tags         = local.common_tags
+  virtual_network_id  = module.networking.vnet_id
 }
 
 module "compute" {
