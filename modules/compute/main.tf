@@ -23,7 +23,7 @@ resource "azurerm_network_interface" "main" {
 }
 
 resource "azurerm_network_security_group" "main" {
-  count = var.vm_scale_set ? 0 : 1
+  count = var.vm_scale_set ? 1 : 0
 
   name                = "${var.prefix}-nsg"
   location            = var.location
@@ -182,6 +182,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   sku                 = var.vm_size
   instances           = 2
   admin_username      = "admintest"
+  admin_password      = "P4ssword1234"
+
 
   admin_ssh_key {
     username   = "admintest"
@@ -199,9 +201,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
     caching              = "ReadWrite"
   }
   network_interface {
-    name    = "vmss-nic"
-    primary = true
-
+    name                      = "vmss-nic"
+    primary                   = true
+    network_security_group_id = azurerm_network_security_group.main[0].id
     ip_configuration {
       name      = "internal"
       primary   = true

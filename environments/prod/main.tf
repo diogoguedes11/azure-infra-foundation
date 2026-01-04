@@ -25,9 +25,12 @@ module "governance" {
   source = "../../modules/governance"
 }
 
+resource "random_id" "name" {
+  byte_length = 4
+}
 module "security" {
   source              = "../../modules/security"
-  key_vault_name      = "kv-prod-foundation1105"
+  key_vault_name      = "kv-prod-foundation${random_id.name.id}"
   resource_group_name = azurerm_resource_group.this.name
   location            = var.location
   tenant_id           = var.tenant_id
@@ -46,12 +49,12 @@ module "networking" {
 }
 
 module "bastion" {
-  source               = "../../modules/bastion"
-  resource_group_name  = azurerm_resource_group.this.name
-  location             = var.location
-  virtual_network_name = module.networking.vnet_id
-  common_tags          = local.common_tags
-  subnet_id            = module.networking.subnet_ids["AzureBastionSubnet"]
+  source              = "../../modules/bastion"
+  resource_group_name = azurerm_resource_group.this.name
+  location            = var.location
+  virtual_network_id  = module.networking.vnet_id
+  common_tags         = local.common_tags
+  subnet_id           = module.networking.subnet_ids["AzureBastionSubnet"]
 }
 
 module "compute" {
