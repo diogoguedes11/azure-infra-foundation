@@ -44,6 +44,16 @@ resource "azurerm_virtual_network_peering" "hub_to_spoke" {
   use_remote_gateways       = false
 }
 
+resource "azurerm_virtual_network_peering" "spoke_to_hub" {
+  name                      = "spoke-to-hub"
+  resource_group_name       = azurerm_resource_group.this.name
+  virtual_network_name      = azurerm_virtual_network.vnet_spoke.name
+  remote_virtual_network_id = azurerm_virtual_network.vnet_hub.id
+  allow_forwarded_traffic   = true
+  allow_gateway_transit     = true
+  use_remote_gateways       = false
+}
+
 resource "azurerm_network_interface" "nic_spoke" {
   name                = "nic-spoke"
   location            = azurerm_resource_group.this.location
