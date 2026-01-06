@@ -62,7 +62,7 @@ resource "azurerm_virtual_machine" "vm_spoke" {
   location              = azurerm_resource_group.this.location
   resource_group_name   = azurerm_resource_group.this.name
   network_interface_ids = [azurerm_network_interface.nic_spoke.id]
-  vm_size               = ""
+  vm_size               = "Standard_B2s"
 
   storage_os_disk {
     name              = "osdisk-spoke"
