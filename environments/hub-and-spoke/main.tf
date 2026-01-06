@@ -49,6 +49,7 @@ resource "azurerm_network_interface" "nic_spoke" {
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
 
+
   ip_configuration {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.spoke_subnet.id
@@ -58,13 +59,13 @@ resource "azurerm_network_interface" "nic_spoke" {
 }
 
 resource "azurerm_linux_virtual_machine" "vm_spoke" {
-  name                = "vm-spoke"
-  resource_group_name = azurerm_resource_group.this.name
-  location            = azurerm_resource_group.this.location
-  size                = "Standard_B1s"
-  admin_username      = "azureuser"
-  admin_password      = "P4ssword1234"
-
+  name                            = "vm-spoke"
+  resource_group_name             = azurerm_resource_group.this.name
+  location                        = azurerm_resource_group.this.location
+  size                            = "Standard_B1s"
+  admin_username                  = "azureuser"
+  admin_password                  = "P4ssword1234"
+  disable_password_authentication = false
   network_interface_ids = [
     azurerm_network_interface.nic_spoke.id,
   ]
@@ -73,7 +74,6 @@ resource "azurerm_linux_virtual_machine" "vm_spoke" {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
-  disable_password_authentication = false
 
   source_image_reference {
     publisher = "Canonical"
@@ -83,6 +83,29 @@ resource "azurerm_linux_virtual_machine" "vm_spoke" {
   }
 
   custom_data = filebase64("${path.module}/cloud-init.sh")
+}
+
+resource "azurerm_network_security_group" "this" {
+  name                = "nsg-hub"
+  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
+
+  security_rule {
+    name                       = "AllowSSH"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_network_interface_security_group_association" "this" {
+  network_interface_id      = azurerm_network_interface.nic_spoke.id
+  network_security_group_id = azurerm_network_security_group.this.id
 }
 
 # Bastion
@@ -111,6 +134,7 @@ resource "azurerm_bastion_host" "this" {
     name                 = "configuration"
     subnet_id            = azurerm_subnet.bastion_subnet.id
     public_ip_address_id = azurerm_public_ip.this.id
+
   }
 }
 
