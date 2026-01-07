@@ -42,6 +42,7 @@ resource "azurerm_virtual_network_peering" "hub_to_spoke" {
   allow_forwarded_traffic   = true
   allow_gateway_transit     = true
   use_remote_gateways       = false
+  depends_on                = [azurerm_virtual_network.vnet_hub, azurerm_virtual_network.vnet_spoke]
 }
 
 resource "azurerm_virtual_network_peering" "spoke_to_hub" {
@@ -52,6 +53,8 @@ resource "azurerm_virtual_network_peering" "spoke_to_hub" {
   allow_forwarded_traffic   = true
   allow_gateway_transit     = true
   use_remote_gateways       = false
+  depends_on                = [azurerm_virtual_network.vnet_hub, azurerm_virtual_network.vnet_spoke]
+
 }
 
 resource "azurerm_public_ip" "nic_spoke" {
