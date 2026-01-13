@@ -121,6 +121,17 @@ resource "azurerm_network_security_group" "nsg_vm" {
   name                = "nsg-vm"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
+  security_rule {
+    name                       = "AllowPing"
+    priority                   = 1002
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Icmp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "VirtualNetwork"
+  }
 
   security_rule {
     name                       = "AllowSSH"
