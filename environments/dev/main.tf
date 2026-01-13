@@ -123,7 +123,7 @@ resource "azurerm_network_security_group" "nsg_vm" {
   resource_group_name = azurerm_resource_group.rg.name
   security_rule {
     name                       = "AllowPing"
-    priority                   = 1002
+    priority                   = 1003
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Icmp"
@@ -157,6 +157,10 @@ resource "azurerm_network_security_group" "nsg_vm" {
     destination_address_prefix = "*"
   }
 
+}
+resource "azurerm_subnet_network_security_group_association" "subnet_assoc" {
+  subnet_id                 = azurerm_subnet.hub_subnet.id
+  network_security_group_id = azurerm_network_security_group.nsg_vm.id
 }
 
 resource "azurerm_network_interface_security_group_association" "nsg_association_nva" {
