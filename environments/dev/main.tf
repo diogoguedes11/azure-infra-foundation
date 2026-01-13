@@ -133,6 +133,18 @@ resource "azurerm_network_security_group" "nsg_vm" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+  # Allow bastion host
+  security_rule {
+    name                       = "AllowBastion"
+    priority                   = 1002
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = azurerm_subnet.bastion_subnet.address_prefixes[0]
+    destination_address_prefix = "*"
+  }
 
 }
 
